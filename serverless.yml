@@ -1,0 +1,68 @@
+service: lambda-demo
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: nodejs16.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - 'dynamodb:PutItem'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:DeleteItem'
+            - 'dynamodb:Scan'
+          Resource:
+            - { 'Fn::GetAtt': ['UsersTable', 'Arn'] }
+
+plugins:
+  - serverless-plugin-typescript
+
+functions:
+  createUser:
+    handler: src/handlers.createUser
+    events:
+      - httpApi:
+          path: /user
+          method: post
+  getUser:
+    handler: src/handlers.getUser
+    events:
+      - httpApi:
+          path: /user/{id}
+          method: get
+  updateUser:
+    handler: src/handlers.updateUser
+    events:
+      - httpApi:
+          path: /user/{id}
+          method: put
+  deleteUser:
+    handler: src/handlers.deleteUser
+    events:
+      - httpApi:
+          path: /user/{id}
+          method: delete
+  listUser:
+    handler: src/handlers.listUser
+    events:
+      - httpApi:
+          path: /users
+          method: get
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UsersTable
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        AttributeDefinitions:
+          - AttributeName: userID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userID
+            KeyType: HASH
