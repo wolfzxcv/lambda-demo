@@ -5,6 +5,7 @@ import {
   PutItemCommand,
   ScanCommand
 } from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { v4 } from 'uuid';
 import * as yup from 'yup';
@@ -44,7 +45,7 @@ const handleError = (e: unknown) => {
       statusCode: 400,
       headers,
       body: JSON.stringify({
-        error: `invalid request body format : "${e.message}"`
+        error: `Invalid request body format : "${e.message}"`
       })
     };
   }
@@ -75,13 +76,13 @@ export const createUser = async (
 
     const putCommand = new PutItemCommand({
       TableName: tableName,
-      Item: user
+      Item: marshall(user)
     });
 
     await dbClient.send(putCommand);
 
     return {
-      statusCode: 201,
+      statusCode: 200,
       headers,
       body: JSON.stringify(user)
     };
@@ -98,13 +99,13 @@ const fetchUserById = async (id: any) => {
     }
   });
 
-  const output = await dbClient.send(getCommand);
+  const { Item } = await dbClient.send(getCommand);
 
-  if (!output.Item) {
+  if (!Item) {
     throw new HttpError(404, { error: 'not found' });
   }
 
-  return output.Item;
+  return unmarshall(Item);
 };
 
 export const getUser = async (
@@ -142,7 +143,7 @@ export const updateUser = async (
 
     const putCommand = new PutItemCommand({
       TableName: tableName,
-      Item: user
+      Item: marshall(user)
     });
 
     await dbClient.send(putCommand);
@@ -175,7 +176,7 @@ export const deleteUser = async (
     await dbClient.send(deleteCommand);
 
     return {
-      statusCode: 204,
+      statusCode: 200,
       body: ''
     };
   } catch (e) {
@@ -189,11 +190,13 @@ export const listUser = async (
   const scanCommand = new ScanCommand({
     TableName: tableName
   });
-  const output = await dbClient.send(scanCommand);
+  const { Items } = await dbClient.send(scanCommand);
+
+  const output = Items?.map(each => unmarshall(each));
 
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify(output.Items)
+    body: JSON.stringify(output)
   };
 };
