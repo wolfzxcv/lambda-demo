@@ -9,3 +9,63 @@
    Ex. `npx serverless invoke local -f listUser`
 6. If you want to deploy to cloud, make sure you have configured aws credentials (the step 2), then run
    `npx serverless deploy`
+
+# Docs
+
+## GET (All)
+
+| Item   | Value      |
+| ------ | ---------- |
+| Method | GET        |
+| path   | **/users** |
+| param  |            |
+
+## GET (One)
+
+| Item   | Value          |
+| ------ | -------------- |
+| Method | GET            |
+| path   | **/user/{id}** |
+| param  | required       |
+
+## POST
+
+| Item   | Value     |
+| ------ | --------- |
+| Method | POST      |
+| path   | **/user** |
+| param  | required  |
+
+```json=
+{
+   "occupation":"Thor",
+   "isActive":true,
+   "name":"Chris Hemsworth",
+   "age": 38
+}
+```
+
+## UPDATE
+
+| Item   | Value          |
+| ------ | -------------- |
+| Method | PUT            |
+| path   | **/user/{id}** |
+| param  | required       |
+
+```json=
+{
+   "occupation":"Thor",
+   "isActive":true,
+   "name":"Chris Hemsworth",
+   "age": 31
+}
+```
+
+## DELETE
+
+| Item   | Value          |
+| ------ | -------------- |
+| Method | DELETE         |
+| path   | **/user/{id}** |
+| param  | required       |
