@@ -170,9 +170,9 @@ export const deleteUser = async (
 
     const deleteCommand = new DeleteItemCommand({
       TableName: tableName,
-      Key: {
+      Key: marshall({
         userID: id
-      }
+      })
     });
 
     await dbClient.send(deleteCommand);
