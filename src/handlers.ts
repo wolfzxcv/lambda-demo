@@ -71,7 +71,7 @@ export const createUser = async (
 
     const user = {
       ...reqBody,
-      userId: v4()
+      userID: v4()
     };
 
     const putCommand = new PutItemCommand({
@@ -94,9 +94,9 @@ export const createUser = async (
 const fetchUserById = async (id: any) => {
   const getCommand = new GetItemCommand({
     TableName: tableName,
-    Key: {
+    Key: marshall({
       userID: id
-    }
+    })
   });
 
   const { Item } = await dbClient.send(getCommand);
@@ -105,19 +105,21 @@ const fetchUserById = async (id: any) => {
     throw new HttpError(404, { error: 'not found' });
   }
 
-  return unmarshall(Item);
+  return Item;
 };
 
 export const getUser = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const user = await fetchUserById(event.pathParameters?.id as string);
+    const id = event.pathParameters?.id as string;
+
+    const user = await fetchUserById(id);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(user)
+      body: JSON.stringify(unmarshall(user))
     };
   } catch (e) {
     return handleError(e);
